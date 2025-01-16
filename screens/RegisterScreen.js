@@ -1,20 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { FontAwesome } from '@expo/vector-icons';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase Auth
 
-export default function RegisterScreen({navigation}) {
+export default function RegisterScreen({ navigation }) {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+
+    // Firebase Signup Function
+    const handleSignUp = () => {
+        if (!email || !password) {
+            Alert.alert("Error", "Please fill in all fields.");
+            return;
+        }
+
+        const auth = getAuth(); // Initialize Firebase Auth
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Successfully created a new user
+                const user = userCredential.user;
+                console.log("User created:", user);
+                Alert.alert("Success", "Account created successfully!");
+                navigation.navigate('LoginScreen'); // Navigate to the Login Screen
+            })
+            .catch((error) => {
+                console.error("Error signing up:", error.message);
+                Alert.alert("Error", error.message);
+            });
+    };
 
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backbutton} onPress={() => navigation.navigate('Home')}>
                 <Icon name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
-
 
             <Text style={styles.title}>Register</Text>
             <Text style={styles.subtitle}>Create your new account</Text>
@@ -54,8 +76,8 @@ export default function RegisterScreen({navigation}) {
                 </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>Login</Text>
+            <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
+                <Text style={styles.loginButtonText}>Sign Up</Text>
             </TouchableOpacity>
 
             <View style={styles.rememberMeContainer}>
@@ -88,10 +110,9 @@ export default function RegisterScreen({navigation}) {
 
             <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account?</Text>
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('LoginScreen')}>
                     <Text style={styles.signUpText}>Login</Text>
                 </TouchableOpacity>
-               
             </View>
         </View>
     );
@@ -184,6 +205,6 @@ const styles = StyleSheet.create({
     signUpText: {
         color: '#256724',
         marginLeft: 5,
-        textDecorationLine: 'underline'
+        textDecorationLine: 'underline',
     },
 });
