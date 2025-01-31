@@ -8,6 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import Page4 from './screens/page4';
 import Page5 from './screens/page5';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 const Stack = createStackNavigator();
 
@@ -15,57 +16,66 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
 
   useEffect(() => {
+    // Listen to authentication state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user); // Set true if user is logged in, false otherwise
+      setIsLoggedIn(!!user); // true if logged in, false otherwise
     });
 
-    return unsubscribe; // Clean up the listener when the component unmounts
+    return unsubscribe; // Cleanup listener
   }, []);
 
   if (isLoggedIn === null) {
-    // Show a loading screen while determining login status
-    return null; // Replace with a loading spinner if needed
+    // Show a loading indicator while checking auth state
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#256724" />
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        {/* HomeScreen will always be the first page */}
+      <Stack.Navigator initialRouteName="Home">
+        {/* Home Screen */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
         />
-        {isLoggedIn ? (
-          // User is logged in, show logged-in screens
-          <>
-            <Stack.Screen
-              name="Page4"
-              component={Page4}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Page5"
-              component={Page5}
-              options={{ headerShown: false }}
-            />
-          </>
-        ) : (
-          // User is not logged in, show login/signup screens
-          <>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
+        {/* Login Screen */}
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        {/* Register Screen */}
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        {/* Page4 */}
+        <Stack.Screen
+          name="Page4"
+          component={Page4}
+          options={{ headerShown: false }}
+        />
+        {/* Page5 */}
+        <Stack.Screen
+          name="Page5"
+          component={Page5}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+});
