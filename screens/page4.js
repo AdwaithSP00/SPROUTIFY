@@ -139,5 +139,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
+<<<<<<< HEAD
  
 });
+=======
+  bottomNav: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    height: 60,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  navButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+});
+>>>>>>> adsexe

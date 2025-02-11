@@ -1,18 +1,17 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-export default function PlantDetailsScreen({ route, navigation }) {
+export default function PlantDetailsScreen({ route }) {
   const { plant } = route.params; // Accessing the plant data passed from the previous screen
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Top Section: Plant Image and Name */}
-        <View style={styles.topSection}>
-          <Image source={{ uri: plant.image }} style={styles.plantImage} />
-          <Text style={styles.plantName}>{plant.name}</Text>
-        </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* Top Section: Plant Image and Name */}
+      <View style={styles.topSection}>
+        <Image source={{ uri: plant.image }} style={styles.plantImage} />
+        <Text style={styles.plantName}>{plant.name}</Text>
+      </View>
 
         {/* Charts Section */}
         <View style={styles.chartsContainer}>
@@ -39,21 +38,35 @@ export default function PlantDetailsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Details Section */}
-        <View style={styles.detailsCard}>
-          <Text style={styles.detailsText}>pH: 6.00</Text>
-          <Text style={styles.detailsText}>Temp: 71°F</Text>
-          <Text style={styles.detailsText}>Moisture Level: Optimal</Text>
-          <Text style={styles.detailsText}>Rain Forecast: 40%</Text>
-          <Text style={styles.detailsText}>Weather Forecast: Cloudy</Text>
-        </View>
-      </ScrollView>
+      {/* Details Section */}
+      <View style={styles.detailsCard}>
+        <Text style={styles.detailsText}>pH: 6.00</Text>
+        <Text style={styles.detailsText}>Temp: 71°F</Text>
+        <Text style={styles.detailsText}>Moisture Level: Optimal</Text>
+        <Text style={styles.detailsText}>Rain Forecast: 40%</Text>
+        <Text style={styles.detailsText}>Weather Forecast: Cloudy</Text>
+      </View>
 
       {/* Bottom Navigation Bar */}
-      <BottomNavBar navigation={navigation} />
-    </View>
+      <View style={styles.bottomNav}>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => console.log("Home clicked")}
+        >
+          <MaterialCommunityIcons name="home-outline" size={30} color="#4CAF50" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.navButton}
+          onPress={() => console.log("Graph clicked")}
+        >
+          <MaterialCommunityIcons name="chart-line" size={30} color="#4CAF50" />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
