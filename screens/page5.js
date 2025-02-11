@@ -1,64 +1,57 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
 
-export default function PlantDetailsScreen({ route }) {
+export default function PlantDetailsScreen({ route, navigation }) {
   const { plant } = route.params; // Accessing the plant data passed from the previous screen
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Top Section: Plant Image and Name */}
-      <View style={styles.topSection}>
-        <Image source={{ uri: plant.image }} style={styles.plantImage} />
-        <Text style={styles.plantName}>{plant.name}</Text>
-      </View>
-
-      {/* Charts Section */}
-      <View style={styles.chartsContainer}>
-        {/* Humidity Level Chart */}
-        <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>Humidity Level</Text>
-          <Image
-            source={{ uri: "https://via.placeholder.com/300x150?text=Humidity+Chart" }}
-            style={styles.chartImage}
-          />
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Top Section: Plant Image and Name */}
+        <View style={styles.topSection}>
+          <Image source={{ uri: plant.image }} style={styles.plantImage} />
+          <Text style={styles.plantName}>{plant.name}</Text>
         </View>
 
-        {/* NPK Pie Chart */}
-        <View style={styles.pieChartSection}>
-          <Text style={styles.chartTitle}>NPK Levels</Text>
-          <Image
-            source={{ uri: "https://via.placeholder.com/150x150?text=NPK+Chart" }}
-            style={styles.pieChartImage}
-          />
-        </View>
-      </View>
+        {/* Charts Section */}
+        <View style={styles.chartsContainer}>
+          {/* Humidity Level Chart */}
+          <View style={styles.chartSection}>
+            <Text style={styles.chartTitle}>Humidity Level</Text>
+            <Image
+              source={{
+                uri: "https://via.placeholder.com/300x150?text=Humidity+Chart",
+              }}
+              style={styles.chartImage}
+            />
+          </View>
 
-      {/* Details Section */}
-      <View style={styles.detailsCard}>
-        <Text style={styles.detailsText}>pH: 6.00</Text>
-        <Text style={styles.detailsText}>Temp: 71°F</Text>
-        <Text style={styles.detailsText}>Moisture Level: Optimal</Text>
-        <Text style={styles.detailsText}>Rain Forecast: 40%</Text>
-        <Text style={styles.detailsText}>Weather Forecast: Cloudy</Text>
-      </View>
+          {/* NPK Pie Chart */}
+          <View style={styles.pieChartSection}>
+            <Text style={styles.chartTitle}>NPK Levels</Text>
+            <Image
+              source={{
+                uri: "https://via.placeholder.com/150x150?text=NPK+Chart",
+              }}
+              style={styles.pieChartImage}
+            />
+          </View>
+        </View>
+
+        {/* Details Section */}
+        <View style={styles.detailsCard}>
+          <Text style={styles.detailsText}>pH: 6.00</Text>
+          <Text style={styles.detailsText}>Temp: 71°F</Text>
+          <Text style={styles.detailsText}>Moisture Level: Optimal</Text>
+          <Text style={styles.detailsText}>Rain Forecast: 40%</Text>
+          <Text style={styles.detailsText}>Weather Forecast: Cloudy</Text>
+        </View>
+      </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => console.log("Home clicked")}
-        >
-          <MaterialCommunityIcons name="home-outline" size={30} color="#4CAF50" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => console.log("Graph clicked")}
-        >
-          <MaterialCommunityIcons name="chart-line" size={30} color="#4CAF50" />
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      <BottomNavBar navigation={navigation} />
+    </View>
   );
 }
 
@@ -132,19 +125,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginBottom: 5,
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    height: 60,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
   },
 });

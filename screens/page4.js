@@ -8,8 +8,7 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-
+import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
 const plants = [
   {
     id: "1",
@@ -47,28 +46,22 @@ const PlantCard = ({ plant, onPress }) => (
 export default function PlantListScreen({ navigation }) {
   const [searchText, setSearchText] = useState("");
 
-  // Filter plants based on search
   const filteredPlants = plants.filter((plant) =>
     plant.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
     <View style={styles.container}>
-      {/* Greeting Section */}
       <View style={styles.header}>
         <Text style={styles.greeting}>Hey Adwaith!</Text>
-
-        {/* Search Bar */}
         <TextInput
           style={styles.searchBar}
           placeholder="Search plants..."
-          placeholderTextColor="#999"
           value={searchText}
           onChangeText={(text) => setSearchText(text)}
         />
       </View>
 
-      {/* Plant List */}
       <FlatList
         data={filteredPlants}
         keyExtractor={(item) => item.id}
@@ -80,27 +73,16 @@ export default function PlantListScreen({ navigation }) {
           />
         )}
         contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
       />
 
-      {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => console.log("Home clicked")}
-        >
-          <MaterialCommunityIcons name="home-outline" size={30} color="#4CAF50" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => console.log("Graph clicked")}
-        >
-          <MaterialCommunityIcons name="chart-line" size={30} color="#4CAF50" />
-        </TouchableOpacity>
-      </View>
+      {/* Common Bottom Navigation */}
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 }
+
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,18 +139,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
   },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    height: 60,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-  },
+ 
 });

@@ -24,7 +24,7 @@ export default function RegisterScreen({ navigation }) {
                 const user = userCredential.user;
                 console.log("User created:", user);
                 Alert.alert("Success", "Account created successfully!");
-                navigation.navigate('LoginScreen'); // Navigate to the Login Screen
+                navigation.navigate('Page4'); // Navigate to Page4 instead of LoginScreen
             })
             .catch((error) => {
                 console.error("Error signing up:", error.message);
@@ -34,7 +34,7 @@ export default function RegisterScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.backbutton} onPress={() => navigation.navigate('Home')}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
                 <Icon name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
 

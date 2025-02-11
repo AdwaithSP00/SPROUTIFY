@@ -30,41 +30,31 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* HomeScreen will always be the first page */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
         />
-        {isLoggedIn ? (
-          // User is logged in, show logged-in screens
-          <>
-            <Stack.Screen
-              name="Page4"
-              component={Page4}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Page5"
-              component={Page5}
-              options={{ headerShown: false }}
-            />
-          </>
-        ) : (
-          // User is not logged in, show login/signup screens
-          <>
-            <Stack.Screen
-              name="Login"
-              component={LoginScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={RegisterScreen}
-              options={{ headerShown: false }}
-            />
-          </>
-        )}
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Page4"
+          component={Page4}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Page5"
+          component={Page5}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
