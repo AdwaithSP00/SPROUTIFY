@@ -1,9 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
+import { getDatabase, ref, onValue } from "firebase/database"; // Firebase imports
+import BottomNavBar from "./BottomNavBar"; // Bottom Navigation Component
 
 export default function PlantDetailsScreen({ route, navigation }) {
   const { plant } = route.params;
+  const [sensorData, setSensorData] = useState({
+    Humidity: "--",
+    Moisture_1: "--",
+    Soil_Moisture: "--",
+    Temperature: "--",
+  });
+
+  useEffect(() => {
+    const db = getDatabase();
+    const sensorRef = ref(db, "sensors"); // Path to Firebase data
+
+    // Listening for real-time changes
+    const unsubscribe = onValue(sensorRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setSensorData(snapshot.val());
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -13,20 +34,20 @@ export default function PlantDetailsScreen({ route, navigation }) {
           <Text style={styles.plantName}>{plant.name}</Text>
         </View>
 
+        {/* Sensor Data Card */}
         <View style={styles.detailsCard}>
-          <Text>pH: 6.00</Text>
-          <Text>Temp: 71°F</Text>
-          <Text>Moisture Level: Optimal</Text>
+          <Text style={styles.detailsText}>🌡 Temperature: {sensorData.Temperature}°C</Text>
+          <Text style={styles.detailsText}>💧 Humidity: {sensorData.Humidity}%</Text>
+          <Text style={styles.detailsText}>🌱 Soil Moisture: {sensorData.Soil_Moisture}</Text>
+          <Text style={styles.detailsText}>🌊 Moisture Level: {sensorData.Moisture_1}</Text>
         </View>
       </ScrollView>
 
-      {/* Common Bottom Navigation */}
+      {/* Bottom Navigation */}
       <BottomNavBar navigation={navigation} />
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -50,43 +71,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#4CAF50",
   },
-  chartsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  chartSection: {
-    backgroundColor: "#E8F5E9",
-    padding: 15,
-    borderRadius: 10,
-    width: "48%",
-    elevation: 3,
-  },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  chartImage: {
-    width: "100%",
-    height: 150,
-    resizeMode: "contain",
-  },
-  pieChartSection: {
-    backgroundColor: "#E8F5E9",
-    padding: 15,
-    borderRadius: 10,
-    width: "48%",
-    alignItems: "center",
-    elevation: 3,
-  },
-  pieChartImage: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
-  },
   detailsCard: {
     backgroundColor: "#E8F5E9",
     padding: 15,
@@ -95,22 +79,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailsText: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
     marginBottom: 5,
   },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    height: 60,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-  },
 });
+

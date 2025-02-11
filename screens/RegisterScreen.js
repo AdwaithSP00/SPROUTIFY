@@ -107,19 +107,7 @@ export default function RegisterScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Social Login */}
-      <Text style={styles.orText}>Or continue with</Text>
-      <View style={styles.socialIconsContainer}>
-        <TouchableOpacity style={styles.socialIcon}>
-          <FontAwesome name="facebook" size={24} color="#3b5998" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialIcon}>
-          <FontAwesome name="google" size={24} color="#DB4437" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialIcon}>
-          <FontAwesome name="apple" size={24} color="#000000" />
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Footer */}
       <View style={styles.footer}>
