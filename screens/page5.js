@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import { getDatabase, ref, onValue } from "firebase/database"; // Firebase imports
+import { View, Text, Image, StyleSheet, ScrollView, Dimensions } from "react-native";
+import { getDatabase, ref, onValue } from "firebase/database";
+import { PieChart } from "react-native-chart-kit"; // Import PieChart
 import BottomNavBar from "./BottomNavBar"; // Bottom Navigation Component
 
 export default function PlantDetailsScreen({ route, navigation }) {
@@ -10,13 +11,16 @@ export default function PlantDetailsScreen({ route, navigation }) {
     Moisture_1: "--",
     Soil_Moisture: "--",
     Temperature: "--",
+    Nitrogen: 0,
+    Phosphorus: 0,
+    Potassium: 0,
   });
 
   useEffect(() => {
     const db = getDatabase();
-    const sensorRef = ref(db, "sensors"); // Path to Firebase data
+    const sensorRef = ref(db, "sensors"); // Firebase path
 
-    // Listening for real-time changes
+    // Fetch real-time data
     const unsubscribe = onValue(sensorRef, (snapshot) => {
       if (snapshot.exists()) {
         setSensorData(snapshot.val());
@@ -26,10 +30,32 @@ export default function PlantDetailsScreen({ route, navigation }) {
     return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
+  const moistureValue =
+    plant.name === "Water Lily" ? sensorData.Moisture_1 : sensorData.Soil_Moisture;
+
+  // NPK Data for Pie Chart
+  const npkData = [
+    {
+      name: "Nitrogen",
+      value: sensorData.Nitrogen,
+      color: "#7B1FA2", // Purple
+    },
+    {
+      name: "Phosphorus",
+      value: sensorData.Phosphorus,
+      color: "#388E3C", // Green
+    },
+    {
+      name: "Potassium",
+      value: sensorData.Potassium,
+      color: "#1976D2", // Blue
+    },
+  ];
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Top Section with Image */}
+        {/* Plant Image Section */}
         <View style={styles.topSection}>
           <View style={styles.imageContainer}>
             <Image source={{ uri: plant.image }} style={styles.plantImage} />
@@ -53,9 +79,27 @@ export default function PlantDetailsScreen({ route, navigation }) {
           <View style={styles.sensorRow}>
             <View style={styles.sensorBox}>
               <Text style={styles.sensorLabel}>🌱 Soil Moisture</Text>
-              <Text style={styles.sensorValue}>{sensorData.Soil_Moisture}</Text>
+              <Text style={styles.sensorValue}>{moistureValue}</Text>
             </View>
           </View>
+        </View>
+
+        {/* NPK Chart Section */}
+        <View style={styles.npkCard}>
+          <Text style={styles.sectionTitle}>🧪 NPK Levels</Text>
+          <PieChart
+            data={npkData}
+            width={Dimensions.get("window").width - 40} // Full width
+            height={200}
+            chartConfig={{
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor={"value"}
+            backgroundColor={"transparent"}
+            paddingLeft={"15"}
+            center={[10, 10]}
+            absolute
+          />
         </View>
       </ScrollView>
 
@@ -65,6 +109,7 @@ export default function PlantDetailsScreen({ route, navigation }) {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -79,7 +124,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     backgroundColor: "#FFF",
-    padding: 15, // 🔹 Increased padding
+    padding: 15,
     borderRadius: 15,
     elevation: 5,
     shadowColor: "#000",
@@ -88,17 +133,24 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   plantImage: {
-    width: 150,  // 🔹 Increased width
-    height: 180, // 🔹 Increased height
+    width: 150,
+    height: 180,
     resizeMode: "contain",
   },
   plantName: {
-    fontSize: 22,  // 🔹 Slightly larger text
+    fontSize: 22,
     fontWeight: "bold",
     color: "#4CAF50",
     marginTop: 10,
   },
   detailsCard: {
+    backgroundColor: "#E8F5E9",
+    padding: 20,
+    borderRadius: 12,
+    elevation: 3,
+    marginBottom: 20,
+  },
+  npkCard: {
     backgroundColor: "#E8F5E9",
     padding: 20,
     borderRadius: 12,
@@ -138,3 +190,4 @@ const styles = StyleSheet.create({
     color: "#333",
   },
 });
+
