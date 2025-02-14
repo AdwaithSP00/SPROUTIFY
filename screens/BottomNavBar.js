@@ -11,12 +11,7 @@ export default function BottomNavBar({ navigation }) {
       >
         <MaterialCommunityIcons name="home-outline" size={30} color="#4CAF50" />
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.navButton}
-        onPress={() => console.log("Graph clicked")}
-      >
-        <MaterialCommunityIcons name="chart-line" size={30} color="#4CAF50" />
-      </TouchableOpacity>
+      
     </View>
   );
 }
