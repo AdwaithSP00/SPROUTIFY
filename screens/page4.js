@@ -9,30 +9,13 @@ import {
   StyleSheet,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
+
 const plants = [
-  {
-    id: "1",
-    name: "Aloe Vera",
-    image:
-      "https://m.media-amazon.com/images/I/81XWpVvk5AL.AC_UF1000,1000_QL80.jpg",
-  },
-  {
-    id: "2",
-    name: "Peace Lily",
-    image:
-      "https://seed2plant.in/cdn/shop/files/SPR-variegated-peace-lily-domino-7097188-hero-A-422d7faa152d42d3a4030ff8a2a33768.jpg?v=1692362762",
-  },
-  {
-    id: "3",
-    name: "Snake Plant",
-    image:
-      "https://cdn.shopify.com/s/files/1/0013/3529/6118/products/Snake-Plant-2048px.jpg?v=1596544888",
-  },
   {
     id: "4",
     name: "Money Plant",
     image:
-      "https://5.imimg.com/data5/ND/LF/MY-25617832/natural-money-plant-500x500.jpg",
+      "https://www.trustbasket.com/cdn/shop/articles/Money_plant.webp?v=1679918387",
   },
 ];
 
@@ -53,7 +36,7 @@ export default function PlantListScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hey Adwaith!</Text>
+        <Text style={styles.greeting}>Hey</Text>
         <TextInput
           style={styles.searchBar}
           placeholder="Search plants..."
@@ -80,8 +63,6 @@ export default function PlantListScreen({ navigation }) {
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -113,12 +94,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   list: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   card: {
     flex: 1,
-    margin: 10,
-    height: 180, // Consistent height for all cards
+    margin: 6,
+    height: 120, // 🔹 Reduced height even more
+    width: 130,  // 🔹 Added fixed width for better control
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
@@ -130,14 +112,15 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   image: {
-    width: 100,
-    height: 100,
-    resizeMode: "contain",
-    marginBottom: 10,
+    width: 80,   // 🔹 Adjusted for better fit
+    height: 80,  // 🔹 Adjusted for better fit
+    resizeMode: "cover",
+    borderRadius: 8,
   },
   text: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#333",
+    marginTop: 4, // 🔹 Reduced space between image & text
   },
   bottomNav: {
     flexDirection: "row",
