@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,13 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
+import BottomNavBar from "./BottomNavBar";
+import { auth } from "../firebaseConfig";
+import { getDatabase, ref, get } from "firebase/database";
 
-const { width } = Dimensions.get("window"); // Get screen width
+const { width } = Dimensions.get("window");
 
+// Sample plant data
 const plants = [
   {
     id: "4",
@@ -23,8 +26,7 @@ const plants = [
   {
     id: "5",
     name: "Water Lily",
-    image:
-      "https://m.media-amazon.com/images/I/51sRsttNlvL.jpg",
+    image: "https://m.media-amazon.com/images/I/51sRsttNlvL._SX679_.jpg",
   },
 ];
 
@@ -37,7 +39,35 @@ const PlantCard = ({ plant, onPress }) => (
 
 export default function PlantListScreen({ navigation }) {
   const [searchText, setSearchText] = useState("");
+  const [firstName, setFirstName] = useState("User"); // Default value
 
+  // Fetch user's first name from Firebase
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const db = getDatabase();
+        const userRef = ref(db, `users/${user.uid}`); // Fetch data using UID
+
+        try {
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const fullName = snapshot.val().fullName || "User";
+            setFirstName(fullName.split(" ")[0]); // Extract first name
+          } else {
+            setFirstName("User"); // Default if name not found
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setFirstName("User");
+        }
+      }
+    };
+
+    fetchUserName();
+  }, []);
+
+  // Filter plants based on search text
   const filteredPlants = plants.filter((plant) =>
     plant.name.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -45,7 +75,7 @@ export default function PlantListScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hey</Text>
+        <Text style={styles.greeting}>Hey {firstName}</Text>
         <TextInput
           style={styles.searchBar}
           placeholder="Search plants..."
@@ -57,7 +87,7 @@ export default function PlantListScreen({ navigation }) {
       <FlatList
         data={filteredPlants}
         keyExtractor={(item) => item.id}
-        numColumns={1} // Ensuring one plant per row
+        numColumns={1}
         renderItem={({ item }) => (
           <PlantCard
             plant={item}
@@ -67,17 +97,17 @@ export default function PlantListScreen({ navigation }) {
         contentContainerStyle={styles.list}
       />
 
-      {/* Common Bottom Navigation */}
       <BottomNavBar navigation={navigation} />
     </View>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FA",
-    marginTop: 50, // Top margin for spacing
+    marginTop: 50,
   },
   header: {
     paddingHorizontal: 20,
@@ -103,11 +133,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   list: {
-    paddingBottom: 60, // Avoid overlapping with bottom nav
+    paddingBottom: 60,
   },
   card: {
-    width: width - 30, // Full screen width minus some padding
-    height: 200, // Adjust height as needed
+    width: width - 30,
+    height: 200,
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
@@ -117,8 +147,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    marginVertical: 8, // Add spacing between cards
-    alignSelf: "center", // Center the card
+    marginVertical: 8,
+    alignSelf: "center",
   },
   image: {
     width: "90%",
@@ -133,4 +163,3 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 });
-

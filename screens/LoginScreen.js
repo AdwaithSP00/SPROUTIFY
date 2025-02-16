@@ -8,40 +8,56 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { signInWithEmailAndPassword } from 'firebase/auth'; // Firebase Auth
-import { auth } from '../firebaseConfig'; // Import Firebase Auth from config
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import { getDatabase, ref, get } from 'firebase/database';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Handle login functionality
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Successfully signed in
-        const user = userCredential.user;
-        console.log('Logged in user:', user.email);
-        Alert.alert('Success', 'You are now logged in!');
-        navigation.replace('Page4'); // Navigate to Page4 and reset stack
-      })
-      .catch((error) => {
-        console.error('Login error:', error.message);
-        let errorMessage = 'Something went wrong. Please try again.';
-        if (error.code === 'auth/user-not-found') {
-          errorMessage = 'No user found with this email.';
-        } else if (error.code === 'auth/wrong-password') {
-          errorMessage = 'Incorrect password. Please try again.';
-        } else if (error.code === 'auth/invalid-email') {
-          errorMessage = 'Invalid email address.';
-        }
-        Alert.alert('Error', errorMessage);
-      });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log('Logged in user:', user.email);
+
+      // Fetch first name using UID (correct approach)
+      const db = getDatabase();
+      const userRef = ref(db, `users/${user.uid}`); // Fetch using UID
+
+      const snapshot = await get(userRef);
+      let firstName = "User"; // Default name
+
+      if (snapshot.exists()) {
+        const fullName = snapshot.val().fullName || "User";
+        firstName = fullName.split(" ")[0]; // Extract first name
+      }
+
+      Alert.alert('Success', `Welcome, ${firstName}!`);
+
+      // Navigate to Page4 and pass first name
+      navigation.replace('Page4', { firstName });
+
+    } catch (error) {
+      console.error('Login error:', error.message);
+      let errorMessage = 'Something went wrong. Please try again.';
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No user found with this email.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password. Please try again.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      }
+      
+      Alert.alert('Error', errorMessage);
+    }
   };
 
   return (
@@ -49,7 +65,6 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.title}>Login</Text>
       <Text style={styles.subtitle}>Enter your credentials</Text>
 
-      {/* Email Input */}
       <View style={styles.inputContainer}>
         <Icon name="email" size={20} color="#000" style={styles.icon} />
         <TextInput
@@ -62,7 +77,6 @@ const LoginScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Password Input */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#000" style={styles.icon} />
         <TextInput
@@ -74,12 +88,10 @@ const LoginScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Login Button */}
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
 
-      {/* Footer Links */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don't have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>

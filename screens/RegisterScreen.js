@@ -8,50 +8,64 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { FontAwesome } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
-import { auth } from '../firebaseConfig'; // Import Firebase auth from your config
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database"; // Import Realtime Database
+import { auth } from '../firebaseConfig';
 
 export default function RegisterScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  
+  // Function to validate email domain
+  const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|hotmail\.com|yahoo\.com)$/;
+    return emailRegex.test(email);
+  };
 
-  // Firebase Signup Function
-  const handleSignUp = () => {
+  // Function to handle user signup
+  const handleSignUp = async () => {
     if (!fullName || !email || !password) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Successfully created a new user
-        const user = userCredential.user;
-        console.log("User created:", user);
-        Alert.alert("Success", "Account created successfully!");
-        navigation.navigate('Login'); // Navigate to the Login screen
-      })
-      .catch((error) => {
-        console.error("Error signing up:", error.message);
-        Alert.alert("Error", error.message);
+    if (!validateEmail(email)) {
+      Alert.alert("Error", "Only Gmail, Hotmail, and Yahoo email addresses are allowed.");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters long.");
+      return;
+    }
+
+    try {
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Get Firebase Realtime Database instance
+      const db = getDatabase();
+
+      // Store user details in Realtime Database
+      await set(ref(db, "users/" + user.uid), {
+        fullName: fullName,
+        email: email,
       });
+
+      Alert.alert("Success", "Account created successfully!", [
+        { text: "OK", onPress: () => navigation.replace('Login') }
+      ]);
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Icon name="arrow-back" size={24} color="#000" />
-      </TouchableOpacity>
-
       <Text style={styles.title}>Register</Text>
-      <Text style={styles.subtitle}>Create your new account</Text>
-
-      {/* Full Name Input */}
+      
       <View style={styles.inputContainer}>
         <Icon name="person" size={20} color="#000" style={styles.icon} />
         <TextInput
@@ -61,8 +75,7 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={setFullName}
         />
       </View>
-
-      {/* Email Input */}
+      
       <View style={styles.inputContainer}>
         <Icon name="email" size={20} color="#000" style={styles.icon} />
         <TextInput
@@ -74,8 +87,7 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={setEmail}
         />
       </View>
-
-      {/* Password Input */}
+      
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#000" style={styles.icon} />
         <TextInput
@@ -86,30 +98,11 @@ export default function RegisterScreen({ navigation }) {
           onChangeText={setPassword}
         />
       </View>
-
-      {/* Sign Up Button */}
+      
       <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
         <Text style={styles.signUpButtonText}>Sign Up</Text>
       </TouchableOpacity>
-
-      {/* Remember Me and Forgot Password */}
-      <View style={styles.rememberMeContainer}>
-        <TouchableOpacity onPress={() => setRememberMe(!rememberMe)}>
-          <Icon
-            name={rememberMe ? "check-box" : "check-box-outline-blank"}
-            size={20}
-            color="#256724"
-          />
-        </TouchableOpacity>
-        <Text style={styles.rememberMeText}>Remember Me</Text>
-        <TouchableOpacity>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-        </TouchableOpacity>
-      </View>
-
       
-
-      {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>Already have an account?</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -120,6 +113,7 @@ export default function RegisterScreen({ navigation }) {
   );
 }
 
+// Styles for the Register Screen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -127,22 +121,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
   },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#256724',
     textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#aaa',
-    textAlign: 'center',
-    marginBottom: 30,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -171,32 +154,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  rememberMeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  rememberMeText: {
-    color: '#256724',
-    marginLeft: 5,
-  },
-  forgotPasswordText: {
-    color: '#256724',
-  },
-  orText: {
-    textAlign: 'center',
-    color: '#aaa',
-    marginVertical: 10,
-  },
-  socialIconsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  socialIcon: {
-    marginHorizontal: 15,
-  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -210,3 +167,4 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
+

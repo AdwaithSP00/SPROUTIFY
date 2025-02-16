@@ -8,6 +8,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import Page4 from './screens/page4';
 import Page5 from './screens/page5';
+import NotificationsScreen from './screens/NotificationsScreen'; // Import NotificationsScreen
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 const Stack = createStackNavigator();
@@ -64,6 +65,12 @@ export default function App() {
         <Stack.Screen
           name="Page5"
           component={Page5}
+          options={{ headerShown: false }}
+        />
+        {/* Notifications Screen */}
+        <Stack.Screen
+          name="NotificationsScreen"
+          component={NotificationsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
