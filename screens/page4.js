@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar"; // Import BottomNavBar component
+
+const { width } = Dimensions.get("window"); // Get screen width
 
 const plants = [
   {
@@ -16,6 +19,12 @@ const plants = [
     name: "Money Plant",
     image:
       "https://www.trustbasket.com/cdn/shop/articles/Money_plant.webp?v=1679918387",
+  },
+  {
+    id: "5",
+    name: "Water Lily",
+    image:
+      "https://m.media-amazon.com/images/I/51sRsttNlvL.jpg",
   },
 ];
 
@@ -48,7 +57,7 @@ export default function PlantListScreen({ navigation }) {
       <FlatList
         data={filteredPlants}
         keyExtractor={(item) => item.id}
-        numColumns={2}
+        numColumns={1} // Ensuring one plant per row
         renderItem={({ item }) => (
           <PlantCard
             plant={item}
@@ -94,13 +103,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   list: {
-    paddingHorizontal: 15,
+    paddingBottom: 60, // Avoid overlapping with bottom nav
   },
   card: {
-    flex: 1,
-    margin: 6,
-    height: 120, // 🔹 Reduced height even more
-    width: 130,  // 🔹 Added fixed width for better control
+    width: width - 30, // Full screen width minus some padding
+    height: 200, // Adjust height as needed
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
@@ -110,30 +117,22 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
+    marginVertical: 8, // Add spacing between cards
+    alignSelf: "center", // Center the card
   },
   image: {
-    width: 80,   // 🔹 Adjusted for better fit
-    height: 80,  // 🔹 Adjusted for better fit
+    width: "90%",
+    height: 150,
     resizeMode: "cover",
-    borderRadius: 8,
+    borderRadius: 10,
   },
   text: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "bold",
     color: "#333",
-    marginTop: 4, // 🔹 Reduced space between image & text
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    height: 60,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
+    marginTop: 5,
   },
 });
+
+
+
