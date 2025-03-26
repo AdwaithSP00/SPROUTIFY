@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { getDatabase, ref, onValue } from "firebase/database";
-import { MaterialIcons } from "@expo/vector-icons"; // Importing for delete icon
+import { MaterialIcons } from "@expo/vector-icons";
 import BottomNavBar from "./BottomNavBar";
 
 const plants = [
@@ -28,49 +28,60 @@ export default function NotificationsScreen({ navigation }) {
 
   useEffect(() => {
     const db = getDatabase();
-    const sensorRef = ref(db, "sensors");
+    const sensorRef = ref(db, "sensors"); // Make sure this matches your Firebase path
 
     const unsubscribe = onValue(sensorRef, (snapshot) => {
       if (snapshot.exists()) {
         const sensorData = snapshot.val();
-        console.log("Fetched data:", sensorData);
+        console.log("Fetched data from Firebase:", JSON.stringify(sensorData, null, 2));
 
         const newNotifications = [];
-
-        // Function to get only hour and seconds
         const getFormattedTime = () => {
           const now = new Date();
-          return `${now.getHours()}:${now.getSeconds()}`;
+          return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
         };
 
-        if (sensorData.Moisture_1 < 76) {
-          const plant = plants.find((p) => p.name === "Water Lily");
-          if (plant) {
-            newNotifications.push({
-              id: plant.id,
-              plant: { ...plant },
-              message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-              timestamp: getFormattedTime(), // Only hour:seconds
-            });
+        // Ensure data structure matches expectations
+        if (sensorData?.waterLily?.moisture !== undefined) {
+          console.log(`Water Lily moisture level: ${sensorData.waterLily.moisture}`);
+          if (sensorData.waterLily.moisture < 40) {
+            console.log("Creating notification for Water Lily");
+            const plant = plants.find((p) => p.name === "Water Lily");
+            if (plant) {
+              newNotifications.push({
+                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
+                plant: { ...plant },
+                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
+                timestamp: getFormattedTime(),
+              });
+            }
           }
+        } else {
+          console.log("Water Lily data missing or undefined.");
         }
 
-        if (sensorData.Soil_Moisture < 76) {
-          const plant = plants.find((p) => p.name === "Money Plant");
-          if (plant) {
-            newNotifications.push({
-              id: plant.id,
-              plant: { ...plant },
-              message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-              timestamp: getFormattedTime(), // Only hour:seconds
-            });
+        if (sensorData?.moneyPlant?.moisture !== undefined) {
+          console.log(`Money Plant moisture level: ${sensorData.moneyPlant.moisture}`);
+          if (sensorData.moneyPlant.moisture < 40) {
+            console.log("Creating notification for Money Plant");
+            const plant = plants.find((p) => p.name === "Money Plant");
+            if (plant) {
+              newNotifications.push({
+                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
+                plant: { ...plant },
+                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
+                timestamp: getFormattedTime(),
+              });
+            }
           }
+        } else {
+          console.log("Money Plant data missing or undefined.");
         }
 
         console.log("Generated notifications:", newNotifications);
         setNotifications(newNotifications);
       } else {
-        console.log("No data found in Firebase.");
+        console.log("No sensor data found in Firebase.");
         setNotifications([]);
       }
     });
@@ -78,7 +89,6 @@ export default function NotificationsScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
-  // Function to delete a notification
   const deleteNotification = (id) => {
     setNotifications((prevNotifications) =>
       prevNotifications.filter((notification) => notification.id !== id)
@@ -92,7 +102,6 @@ export default function NotificationsScreen({ navigation }) {
         {notifications.length > 0 ? (
           notifications.map((notification) => (
             <View key={notification.id} style={styles.notificationCard}>
-              {/* Red Cross Delete Button */}
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => deleteNotification(notification.id)}
@@ -100,7 +109,6 @@ export default function NotificationsScreen({ navigation }) {
                 <MaterialIcons name="close" size={20} color="red" />
               </TouchableOpacity>
 
-              {/* Notification Text */}
               <TouchableOpacity
                 onPress={() =>
                   navigation.navigate("Page5", { plant: notification.plant })
@@ -109,7 +117,6 @@ export default function NotificationsScreen({ navigation }) {
                 <Text style={styles.notificationText}>{notification.message}</Text>
               </TouchableOpacity>
 
-              {/* Timestamp at bottom right */}
               <Text style={styles.timestamp}>{notification.timestamp}</Text>
             </View>
           ))
@@ -138,7 +145,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginBottom: 60, // Space for bottom navigation
+    marginBottom: 60,
   },
   notificationCard: {
     backgroundColor: "#FFF3E0",
@@ -171,3 +178,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+

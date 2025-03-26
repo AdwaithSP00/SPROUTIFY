@@ -1,61 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Image, StyleSheet, ScrollView, Dimensions } from "react-native";
 import { getDatabase, ref, onValue } from "firebase/database";
-import { PieChart } from "react-native-chart-kit"; // Import PieChart
+import { PieChart } from "react-native-chart-kit";
 import BottomNavBar from "./BottomNavBar"; // Bottom Navigation Component
 
 export default function PlantDetailsScreen({ route, navigation }) {
   const { plant } = route.params;
-  const [sensorData, setSensorData] = useState({
-    Humidity: "--",
-    Moisture_1: "--",
-    Soil_Moisture: "--",
-    Temperature: "--",
-    Nitrogen: 0,
-    Phosphorus: 0,
-    Potassium: 0,
-  });
+  const [sensorData, setSensorData] = useState(null);
 
   useEffect(() => {
     const db = getDatabase();
     const sensorRef = ref(db, "sensors"); // Firebase path
 
-    // Fetch real-time data
     const unsubscribe = onValue(sensorRef, (snapshot) => {
       if (snapshot.exists()) {
         setSensorData(snapshot.val());
       }
-    });
+    }, (error) => console.error("Firebase error: ", error));
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
-  const moistureValue =
-    plant.name === "Water Lily" ? sensorData.Moisture_1 : sensorData.Soil_Moisture;
+  if (!sensorData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading sensor data...</Text>
+      </View>
+    );
+  }
 
-  // NPK Data for Pie Chart
+  // Select correct data based on the plant
+  const plantData =
+    plant.name === "Water Lily" ? sensorData?.waterLily : sensorData?.moneyPlant;
+
   const npkData = [
-    {
-      name: "Nitrogen",
-      value: sensorData.Nitrogen,
-      color: "#7B1FA2", // Purple
-    },
-    {
-      name: "Phosphorus",
-      value: sensorData.Phosphorus,
-      color: "#388E3C", // Green
-    },
-    {
-      name: "Potassium",
-      value: sensorData.Potassium,
-      color: "#1976D2", // Blue
-    },
-  ];
+    { name: "Nitrogen", value: sensorData.Nitrogen, color: "#7B1FA2" },
+    { name: "Phosphorus", value: sensorData.Phosphorus, color: "#388E3C" },
+    { name: "Potassium", value: sensorData.Potassium, color: "#1976D2" },
+  ].filter((item) => item.value > 0); // Remove zero values for better visualization
 
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Plant Image Section */}
+        {/* Plant Image */}
         <View style={styles.topSection}>
           <View style={styles.imageContainer}>
             <Image source={{ uri: plant.image }} style={styles.plantImage} />
@@ -69,38 +56,40 @@ export default function PlantDetailsScreen({ route, navigation }) {
           <View style={styles.sensorRow}>
             <View style={styles.sensorBox}>
               <Text style={styles.sensorLabel}>🌡 Temperature</Text>
-              <Text style={styles.sensorValue}>{sensorData.Temperature}°C</Text>
+              <Text style={styles.sensorValue}>{plantData.temperature}°C</Text>
             </View>
             <View style={styles.sensorBox}>
               <Text style={styles.sensorLabel}>💧 Humidity</Text>
-              <Text style={styles.sensorValue}>{sensorData.Humidity}%</Text>
+              <Text style={styles.sensorValue}>{plantData.humidity}%</Text>
             </View>
           </View>
           <View style={styles.sensorRow}>
             <View style={styles.sensorBox}>
               <Text style={styles.sensorLabel}>🌱 Soil Moisture</Text>
-              <Text style={styles.sensorValue}>{moistureValue}</Text>
+              <Text style={styles.sensorValue}>{plantData.moisture}</Text>
             </View>
           </View>
         </View>
 
         {/* NPK Chart Section */}
-        <View style={styles.npkCard}>
-          <Text style={styles.sectionTitle}>🧪 NPK Levels</Text>
-          <PieChart
-            data={npkData}
-            width={Dimensions.get("window").width - 40} // Full width
-            height={200}
-            chartConfig={{
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            }}
-            accessor={"value"}
-            backgroundColor={"transparent"}
-            paddingLeft={"15"}
-            center={[10, 10]}
-            absolute
-          />
-        </View>
+        {npkData.length > 0 && (
+          <View style={styles.npkCard}>
+            <Text style={styles.sectionTitle}>🧪 NPK Levels</Text>
+            <PieChart
+              data={npkData}
+              width={Dimensions.get("window").width - 40}
+              height={200}
+              chartConfig={{
+                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              }}
+              accessor={"value"}
+              backgroundColor={"transparent"}
+              paddingLeft={"15"}
+              center={[10, 10]}
+              absolute
+            />
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -189,5 +178,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#555",
+  },
 });
-
