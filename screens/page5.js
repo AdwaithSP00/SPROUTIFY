@@ -71,8 +71,8 @@ export default function PlantDetailsScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* NPK Chart Section */}
-        {npkData.length > 0 && (
+        {/* NPK Chart Section - Only for Money Plant */}
+        {plant.name === "Money Plant" && npkData.length > 0 && (
           <View style={styles.npkCard}>
             <Text style={styles.sectionTitle}>🧪 NPK Levels</Text>
             <PieChart

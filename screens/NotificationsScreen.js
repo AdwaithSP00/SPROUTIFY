@@ -28,7 +28,7 @@ export default function NotificationsScreen({ navigation }) {
 
   useEffect(() => {
     const db = getDatabase();
-    const sensorRef = ref(db, "sensors"); // Make sure this matches your Firebase path
+    const sensorRef = ref(db, "sensors");
 
     const unsubscribe = onValue(sensorRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -41,41 +41,43 @@ export default function NotificationsScreen({ navigation }) {
           return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
         };
 
-        // Ensure data structure matches expectations
-        if (sensorData?.waterLily?.moisture !== undefined) {
-          console.log(`Water Lily moisture level: ${sensorData.waterLily.moisture}`);
-          if (sensorData.waterLily.moisture < 40) {
-            console.log("Creating notification for Water Lily");
-            const plant = plants.find((p) => p.name === "Water Lily");
-            if (plant) {
-              newNotifications.push({
-                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
-                plant: { ...plant },
-                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-                timestamp: getFormattedTime(),
-              });
-            }
+        // 🟢 Moisture Alerts for Water Lily & Money Plant
+        if (sensorData?.waterLily?.moisture !== undefined && sensorData.waterLily.moisture < 40) {
+          const plant = plants.find((p) => p.name === "Water Lily");
+          if (plant) {
+            newNotifications.push({
+              id: `${plant.id}-${getFormattedTime()}`,
+              plant: { ...plant },
+              message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
+              timestamp: getFormattedTime(),
+            });
           }
-        } else {
-          console.log("Water Lily data missing or undefined.");
         }
 
-        if (sensorData?.moneyPlant?.moisture !== undefined) {
-          console.log(`Money Plant moisture level: ${sensorData.moneyPlant.moisture}`);
-          if (sensorData.moneyPlant.moisture < 40) {
-            console.log("Creating notification for Money Plant");
-            const plant = plants.find((p) => p.name === "Money Plant");
-            if (plant) {
-              newNotifications.push({
-                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
-                plant: { ...plant },
-                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-                timestamp: getFormattedTime(),
-              });
-            }
+        if (sensorData?.moneyPlant?.moisture !== undefined && sensorData.moneyPlant.moisture < 40) {
+          const plant = plants.find((p) => p.name === "Money Plant");
+          if (plant) {
+            newNotifications.push({
+              id: `${plant.id}-${getFormattedTime()}`,
+              plant: { ...plant },
+              message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
+              timestamp: getFormattedTime(),
+            });
           }
-        } else {
-          console.log("Money Plant data missing or undefined.");
+        }
+
+        // 🔴 Check if ANY nutrient is low
+        const isNutrientLow =
+          (sensorData?.Nitrogen !== undefined && sensorData.Nitrogen < 40) ||
+          (sensorData?.Phosphorus !== undefined && sensorData.Phosphorus < 40) ||
+          (sensorData?.Potassium !== undefined && sensorData.Potassium < 40);
+
+        if (isNutrientLow) {
+          newNotifications.push({
+            id: `Nutrient-${getFormattedTime()}`,
+            message: "⚠️ Nutrient levels are low, pump activated.",
+            timestamp: getFormattedTime(),
+          });
         }
 
         console.log("Generated notifications:", newNotifications);
@@ -111,7 +113,9 @@ export default function NotificationsScreen({ navigation }) {
 
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("Page5", { plant: notification.plant })
+                  notification.plant
+                    ? navigation.navigate("Page5", { plant: notification.plant })
+                    : null
                 }
               >
                 <Text style={styles.notificationText}>{notification.message}</Text>
@@ -129,6 +133,7 @@ export default function NotificationsScreen({ navigation }) {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -178,5 +183,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
-
