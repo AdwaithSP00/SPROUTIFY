@@ -9,7 +9,7 @@ export default function HomeScreen({ navigation }) {
       style={styles.background}
     >
       <View style={styles.overlay}>
-        <Text style={styles.title}>Sproutify</Text>
+        <Text style={styles.title}>Sproutify  </Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
             <Text style={styles.buttonText}>Sign in</Text>
