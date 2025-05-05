@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, off } from "firebase/database";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomNavBar from "./BottomNavBar";
 
@@ -28,12 +28,12 @@ export default function NotificationsScreen({ navigation }) {
 
   useEffect(() => {
     const db = getDatabase();
-    const sensorRef = ref(db, "sensors"); // Make sure this matches your Firebase path
+    const pumpRef = ref(db, "PumpControl");
 
-    const unsubscribe = onValue(sensorRef, (snapshot) => {
+    const unsubscribe = onValue(pumpRef, (snapshot) => {
       if (snapshot.exists()) {
-        const sensorData = snapshot.val();
-        console.log("Fetched data from Firebase:", JSON.stringify(sensorData, null, 2));
+        const pumpData = snapshot.val();
+        console.log("Fetched pump control data:", JSON.stringify(pumpData, null, 2));
 
         const newNotifications = [];
         const getFormattedTime = () => {
@@ -41,52 +41,49 @@ export default function NotificationsScreen({ navigation }) {
           return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
         };
 
-        // Ensure data structure matches expectations
-        if (sensorData?.waterLily?.moisture !== undefined) {
-          console.log(`Water Lily moisture level: ${sensorData.waterLily.moisture}`);
-          if (sensorData.waterLily.moisture < 40) {
-            console.log("Creating notification for Water Lily");
-            const plant = plants.find((p) => p.name === "Water Lily");
-            if (plant) {
-              newNotifications.push({
-                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
-                plant: { ...plant },
-                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-                timestamp: getFormattedTime(),
-              });
-            }
-          }
-        } else {
-          console.log("Water Lily data missing or undefined.");
+        // 🔴 Pump1: Nutrient Pump for Money Plant
+        if (pumpData?.moneyPlant?.Pump1 === 1) {
+          newNotifications.push({
+            id: `Pump1-${getFormattedTime()}`,
+            message: "⚠ Nutrient levels are low, pump activated.",
+            timestamp: getFormattedTime(),
+          });
         }
 
-        if (sensorData?.moneyPlant?.moisture !== undefined) {
-          console.log(`Money Plant moisture level: ${sensorData.moneyPlant.moisture}`);
-          if (sensorData.moneyPlant.moisture < 40) {
-            console.log("Creating notification for Money Plant");
-            const plant = plants.find((p) => p.name === "Money Plant");
-            if (plant) {
-              newNotifications.push({
-                id: `${plant.id}-${getFormattedTime()}`, // Unique ID
-                plant: { ...plant },
-                message: `⚠️ ${plant.name} - Soil moisture is low, pump activated.`,
-                timestamp: getFormattedTime(),
-              });
-            }
+        // 💧 Pump2: Water Pump for Money Plant
+        if (pumpData?.moneyPlant?.Pump2 === 1) {
+          const plant = plants.find((p) => p.name === "Money Plant");
+          if (plant) {
+            newNotifications.push({
+              id: `Pump2-${getFormattedTime()}`,
+              plant: { ...plant },
+              message: `⚠ Water pump is activated for ${plant.name}.`,
+              timestamp: getFormattedTime(),
+            });
           }
-        } else {
-          console.log("Money Plant data missing or undefined.");
         }
 
-        console.log("Generated notifications:", newNotifications);
+        // 💧 Pump3: Water Pump for Water Lily
+        if (pumpData?.waterLily?.Pump3 === 1) {
+          const plant = plants.find((p) => p.name === "Water Lily");
+          if (plant) {
+            newNotifications.push({
+              id: `Pump3-${getFormattedTime()}`,
+              plant: { ...plant },
+              message: `⚠ Water pump is activated for ${plant.name}.`,
+              timestamp: getFormattedTime(),
+            });
+          }
+        }
+
         setNotifications(newNotifications);
       } else {
-        console.log("No sensor data found in Firebase.");
+        console.log("No pump control data found.");
         setNotifications([]);
       }
     });
 
-    return () => unsubscribe();
+    return () => off(pumpRef);
   }, []);
 
   const deleteNotification = (id) => {
@@ -111,7 +108,9 @@ export default function NotificationsScreen({ navigation }) {
 
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("Page5", { plant: notification.plant })
+                  notification.plant
+                    ? navigation.navigate("Page5", { plant: notification.plant })
+                    : null
                 }
               >
                 <Text style={styles.notificationText}>{notification.message}</Text>
@@ -178,5 +177,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
-
